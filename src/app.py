@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger("heart-api")
 
-app = FastAPI(title="Heart Disease Risk API", version="1.0.0")
+app = FastAPI(title="Heart Disease Risk API - Bhavana Kongara (2025CT05031)", version="1.0.0")
 
 REQUESTS = Counter("api_requests_total", "Total API requests",
                    ["method", "endpoint", "status"])

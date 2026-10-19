@@ -1,5 +1,5 @@
-# Heart Disease Risk Prediction - End-to-End MLOps Pipeline
-BITS Pilani - MLOps (AIMLCZG523) Assignment 01
+# Heart Disease Risk Prediction - MLOps Assignment 01
+Submitted by: Bhavana Kongara (2025CT05031), BITS Pilani, AIMLCZG523
 
 Classifier predicting heart-disease risk from the UCI Cleveland dataset, with MLflow tracking,
 pytest + GitHub Actions CI, Docker, Kubernetes, and Prometheus/Grafana monitoring.
