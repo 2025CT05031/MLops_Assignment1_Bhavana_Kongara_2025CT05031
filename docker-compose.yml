@@ -1,0 +1,15 @@
+# Local stack: API + Prometheus + Grafana
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    volumes: ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml"]
+    ports: ["9090:9090"]
+    depends_on: [api]
+  grafana:
+    image: grafana/grafana:11.1.0
+    ports: ["3000:3000"]
+    volumes: ["./monitoring/grafana-datasource.yml:/etc/grafana/provisioning/datasources/ds.yml"]
+    depends_on: [prometheus]

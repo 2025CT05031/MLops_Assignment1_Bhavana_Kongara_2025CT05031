@@ -1,0 +1,69 @@
+name: CI-CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Lint
+        run: flake8 src tests scripts
+      - name: Unit tests
+        run: pytest -v --cov=src --cov-report=xml --junitxml=pytest-report.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            pytest-report.xml
+            coverage.xml
+
+  train:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Download and clean data
+        run: python scripts/download_data.py
+      - name: Train models (MLflow tracked)
+        run: python -m src.train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model-and-mlruns
+          path: |
+            models/model.joblib
+            mlflow.db
+            mlartifacts/
+            reports/
+
+  docker:
+    needs: train
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: model-and-mlruns
+      - name: Build image
+        run: docker build -t heart-api:ci .
+      - name: Smoke test container
+        run: |
+          docker run -d -p 8000:8000 --name api heart-api:ci
+          for i in $(seq 1 20); do curl -sf localhost:8000/health && break || sleep 2; done
+          curl -sf -X POST localhost:8000/predict -H 'Content-Type: application/json' \
+            -d '{"age":63,"sex":1,"cp":4,"trestbps":145,"chol":233,"fbs":1,"restecg":2,"thalach":150,"exang":0,"oldpeak":2.3,"slope":3,"ca":0,"thal":6}'
+          docker logs api
