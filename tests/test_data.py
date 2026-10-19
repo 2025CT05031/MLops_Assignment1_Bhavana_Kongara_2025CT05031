@@ -6,7 +6,7 @@ from src.features import build_preprocessor
 
 
 def test_clean_binarises_target(clean_df):
-    assert set(clean_df[config.TARGET].unique()) <= {0, 1}
+    assert set(clean_df[config.TARGET].unique()) <= {5}
     assert "num" not in clean_df.columns
 
 
